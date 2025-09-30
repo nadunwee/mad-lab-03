@@ -234,7 +234,7 @@ Total: 1,302 lines of Kotlin code
 
 ```kotlin
 // Core Android Libraries
-androidx.core:core-ktx:1.17.0
+androidx.core:core-ktx:1.12.0
 androidx.appcompat:appcompat:1.7.1
 com.google.android.material:material:1.13.0
 androidx.activity:activity:1.10.1
