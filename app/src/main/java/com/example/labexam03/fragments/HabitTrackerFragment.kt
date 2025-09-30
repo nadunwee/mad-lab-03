@@ -72,7 +72,7 @@ class HabitTrackerFragment : Fragment() {
      */
     private fun setupRecyclerView() {
         habitAdapter = HabitAdapter(
-            habits = habits,
+            habits = habits.toMutableList(),
             onIncrement = { habit -> incrementHabit(habit) },
             onEdit = { habit -> showEditHabitDialog(habit) },
             onDelete = { habit -> showDeleteConfirmation(habit) }

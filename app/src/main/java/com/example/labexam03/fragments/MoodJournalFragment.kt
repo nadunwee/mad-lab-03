@@ -89,7 +89,7 @@ class MoodJournalFragment : Fragment() {
      */
     private fun setupRecyclerView() {
         moodAdapter = MoodAdapter(
-            moodEntries = moodEntries,
+            moodEntries = moodEntries.toMutableList(),
             onItemClick = { entry -> showMoodDetails(entry) }
         )
         
