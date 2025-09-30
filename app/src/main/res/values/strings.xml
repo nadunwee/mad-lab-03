@@ -1,3 +1,36 @@
 <resources>
-    <string name="app_name">LabExam03</string>
+    <string name="app_name">Personal Wellness</string>
+    
+    <!-- Navigation -->
+    <string name="habits">Habits</string>
+    <string name="mood">Mood</string>
+    <string name="settings">Settings</string>
+    
+    <!-- Habit Tracker -->
+    <string name="daily_habits">Daily Habits</string>
+    <string name="no_habits_yet">No habits yet. Tap + to add one!</string>
+    <string name="add_habit">Add Habit</string>
+    <string name="habit_name">Habit Name</string>
+    <string name="daily_target">Daily Target</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    
+    <!-- Mood Journal -->
+    <string name="mood_journal">Mood Journal</string>
+    <string name="mood_history">Mood History</string>
+    <string name="no_mood_entries">No mood entries yet. Tap + to log your mood!</string>
+    <string name="add_mood">Add Mood</string>
+    <string name="share_mood">Share Mood</string>
+    <string name="select_mood">How are you feeling?</string>
+    <string name="add_note_optional">Add a note (optional)</string>
+    
+    <!-- Settings -->
+    <string name="hydration_reminders">Hydration Reminders</string>
+    <string name="enable_reminders">Enable Reminders</string>
+    <string name="reminder_interval">Reminder Interval</string>
+    <string name="interval_hint">15 minutes to 4 hours</string>
+    <string name="save_settings">Save Settings</string>
+    <string name="test_notification">Test Notification</string>
+    <string name="about">About</string>
+    <string name="app_description">Personal Wellness app helps you track daily habits, log moods, and stay hydrated with customizable reminders. Built with Kotlin and Material Design.</string>
 </resources>
