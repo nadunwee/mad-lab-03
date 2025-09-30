@@ -340,7 +340,7 @@ mad-lab-03/
 ## 🔧 Dependencies
 
 ### AndroidX Libraries
-- core-ktx:1.17.0
+- core-ktx:1.12.0
 - appcompat:1.7.1
 - constraintlayout:2.2.1
 - fragment-ktx:1.6.2
