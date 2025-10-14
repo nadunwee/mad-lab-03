@@ -46,8 +46,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:src="@android:drawable/ic_input_add"
-                android:contentDescription="@string/add_mood" />
+                android:src="@drawable/ic_add"
+                android:contentDescription="@string/add_mood"
+                app:tint="@color/white"
+                app:backgroundTint="@color/primary" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/shareMoodButton"
@@ -55,7 +57,9 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:src="@android:drawable/ic_menu_share"
-                android:contentDescription="@string/share_mood" />
+                android:contentDescription="@string/share_mood"
+                app:tint="@color/white"
+                app:backgroundTint="@color/accent" />
 
         </LinearLayout>
 
