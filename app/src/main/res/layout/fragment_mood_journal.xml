@@ -70,8 +70,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_add"
         android:contentDescription="@string/add_mood"
+        app:tint="@color/white"
+        app:backgroundTint="@color/primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/shareMoodButton" />
 
@@ -83,6 +85,8 @@
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_menu_share"
         android:contentDescription="@string/share_mood"
+        app:tint="@color/white"
+        app:backgroundTint="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

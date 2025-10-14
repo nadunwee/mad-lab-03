@@ -4,14 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/card_stroke">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <!-- Emoji -->
         <TextView
@@ -41,7 +43,8 @@
                     android:layout_height="wrap_content"
                     android:text="2024-03-15"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
 
                 <TextView
                     android:id="@+id/moodTimeText"
@@ -49,6 +52,7 @@
                     android:layout_height="wrap_content"
                     android:text="14:30"
                     android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginStart="8dp" />
 
             </LinearLayout>
@@ -61,7 +65,7 @@
                 android:text="Had a great day!"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 
