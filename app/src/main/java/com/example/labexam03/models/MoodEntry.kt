@@ -1,5 +1,7 @@
 package com.example.labexam03.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.io.Serializable
 
 /**
@@ -11,7 +13,9 @@ import java.io.Serializable
  * @param dateString Formatted date string (YYYY-MM-DD)
  * @param timeString Formatted time string (HH:mm)
  */
+@Entity(tableName = "mood_entries")
 data class MoodEntry(
+    @PrimaryKey
     val id: String = java.util.UUID.randomUUID().toString(),
     val emoji: String,
     val note: String = "",

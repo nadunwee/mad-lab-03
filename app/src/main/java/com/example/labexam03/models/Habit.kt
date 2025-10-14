@@ -1,5 +1,7 @@
 package com.example.labexam03.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.io.Serializable
 
 /**
@@ -10,7 +12,9 @@ import java.io.Serializable
  * @param currentCount Current progress count
  * @param lastUpdated Last update date (YYYY-MM-DD format)
  */
+@Entity(tableName = "habits")
 data class Habit(
+    @PrimaryKey
     val id: String = java.util.UUID.randomUUID().toString(),
     val name: String,
     val targetCount: Int,
