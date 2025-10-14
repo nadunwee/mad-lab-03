@@ -16,12 +16,15 @@ A fully functional Android wellness application built with Kotlin that helps use
 - ✅ Auto-reset progress at start of new day
 - ✅ Show completion status with color indicators
 - ✅ Empty state message when no habits exist
-- ✅ Persistent storage using SharedPreferences
+- ✅ Persistent storage using **Room Database (SQLite)**
+- ✅ Async operations with Kotlin Coroutines
 
 **Files:**
-- `fragments/HabitTrackerFragment.kt` (336 lines)
+- `fragments/HabitTrackerFragment.kt` (272 lines)
 - `adapters/HabitAdapter.kt` (82 lines)
-- `models/Habit.kt` (38 lines)
+- `models/Habit.kt` (42 lines) - Room Entity
+- `database/HabitDao.kt` - Data Access Object
+- `repository/HabitRepository.kt` - Repository pattern
 - `layout/fragment_habit_tracker.xml`
 - `layout/item_habit.xml`
 - `layout/dialog_add_habit.xml`
@@ -35,12 +38,15 @@ A fully functional Android wellness application built with Kotlin that helps use
 - ✅ Tap to view mood entry details
 - ✅ Empty state message when no entries exist
 - ✅ Share mood summary via implicit intent
-- ✅ Persistent storage using SharedPreferences
+- ✅ Persistent storage using **Room Database (SQLite)**
+- ✅ Async operations with Kotlin Coroutines
 
 **Files:**
-- `fragments/MoodJournalFragment.kt` (318 lines)
+- `fragments/MoodJournalFragment.kt` (325 lines)
 - `adapters/MoodAdapter.kt` (66 lines)
-- `models/MoodEntry.kt` (38 lines)
+- `models/MoodEntry.kt` (41 lines) - Room Entity
+- `database/MoodEntryDao.kt` - Data Access Object
+- `repository/MoodEntryRepository.kt` - Repository pattern
 - `layout/fragment_mood_journal.xml`
 - `layout/item_mood.xml`
 - `layout/dialog_add_mood.xml`
@@ -91,10 +97,13 @@ A fully functional Android wellness application built with Kotlin that helps use
 - ✅ Explicit intents for fragment transactions
 
 **Data Persistence:**
-- ✅ SharedPreferences for all data storage
-- ✅ Gson for JSON serialization/deserialization
-- ✅ PreferencesManager utility class
-- ✅ No database usage (as required)
+- ✅ **Room Database (SQLite)** for habits and mood entries
+- ✅ DAO interfaces for type-safe database operations
+- ✅ Repository pattern for clean architecture
+- ✅ Kotlin Coroutines for async database operations
+- ✅ Flow for reactive data updates
+- ✅ Automatic migration from old SharedPreferences data
+- ✅ SharedPreferences for app settings (reminders)
 - ✅ State preserved across app restarts
 
 **Fragments & Activities:**
@@ -145,19 +154,26 @@ app/src/main/java/com/example/labexam03/
 ├── adapters/                 # RecyclerView adapters
 │   ├── HabitAdapter.kt      # 82 lines
 │   └── MoodAdapter.kt       # 66 lines
+├── database/                 # Room database layer
+│   ├── AppDatabase.kt       # Database instance
+│   ├── HabitDao.kt          # Habit DAO
+│   └── MoodEntryDao.kt      # MoodEntry DAO
 ├── fragments/                # UI fragments
-│   ├── HabitTrackerFragment.kt     # 336 lines
-│   ├── MoodJournalFragment.kt      # 318 lines
+│   ├── HabitTrackerFragment.kt     # 272 lines
+│   ├── MoodJournalFragment.kt      # 325 lines
 │   └── SettingsFragment.kt         # 175 lines
-├── models/                   # Data models
-│   ├── Habit.kt             # 38 lines
-│   └── MoodEntry.kt         # 38 lines
+├── models/                   # Data models (Room Entities)
+│   ├── Habit.kt             # 42 lines
+│   └── MoodEntry.kt         # 41 lines
 ├── receivers/                # Broadcast receivers
 │   └── HydrationReminderReceiver.kt # 78 lines
+├── repository/               # Repository pattern
+│   ├── HabitRepository.kt   # Habit data access
+│   └── MoodEntryRepository.kt # MoodEntry data access
 └── utils/                    # Utility classes
-    └── PreferencesManager.kt # 101 lines
+    └── PreferencesManager.kt # Database & settings manager
 
-Total: 1,302 lines of Kotlin code
+Total: ~1,500+ lines of Kotlin code
 ```
 
 **Comments & Documentation:**
@@ -179,17 +195,22 @@ Total: 1,302 lines of Kotlin code
 
 ## File Summary
 
-### Kotlin Files (10 files, 1,302 lines)
+### Kotlin Files (15 files, ~1,500+ lines)
 1. `MainActivity.kt` - Main activity with navigation (98 lines)
-2. `HabitTrackerFragment.kt` - Habit management (336 lines)
-3. `MoodJournalFragment.kt` - Mood logging (318 lines)
+2. `HabitTrackerFragment.kt` - Habit management (272 lines)
+3. `MoodJournalFragment.kt` - Mood logging (325 lines)
 4. `SettingsFragment.kt` - Settings configuration (175 lines)
 5. `HabitAdapter.kt` - Habit list adapter (82 lines)
 6. `MoodAdapter.kt` - Mood list adapter (66 lines)
-7. `Habit.kt` - Habit data model (38 lines)
-8. `MoodEntry.kt` - Mood entry data model (38 lines)
+7. `Habit.kt` - Habit Room Entity (42 lines)
+8. `MoodEntry.kt` - MoodEntry Room Entity (41 lines)
 9. `HydrationReminderReceiver.kt` - Notification receiver (78 lines)
-10. `PreferencesManager.kt` - Data persistence utility (101 lines)
+10. `PreferencesManager.kt` - Database & settings manager (180+ lines)
+11. `AppDatabase.kt` - Room database instance
+12. `HabitDao.kt` - Habit data access object
+13. `MoodEntryDao.kt` - MoodEntry data access object
+14. `HabitRepository.kt` - Habit repository
+15. `MoodEntryRepository.kt` - MoodEntry repository
 
 ### Layout Files (17 files)
 **Portrait Layouts:**
@@ -249,7 +270,12 @@ androidx.work:work-runtime-ktx:2.9.0
 // Charts (Advanced Feature)
 com.github.PhilJay:MPAndroidChart:v3.1.0
 
-// JSON Serialization
+// Room Database (SQLite ORM)
+androidx.room:room-runtime:2.6.1
+androidx.room:room-ktx:2.6.1
+androidx.room:room-compiler:2.6.1 (KSP)
+
+// JSON Serialization (for settings)
 com.google.code.gson:gson:2.10.1
 
 // Testing

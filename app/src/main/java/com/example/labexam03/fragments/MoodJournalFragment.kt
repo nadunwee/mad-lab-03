@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.labexam03.R
@@ -23,6 +24,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,7 +70,7 @@ class MoodJournalFragment : Fragment() {
         // Set up RecyclerView
         setupRecyclerView()
         
-        // Load mood entries from SharedPreferences
+        // Load mood entries from Room Database
         loadMoodEntries()
         
         // Set up chart
@@ -100,16 +102,17 @@ class MoodJournalFragment : Fragment() {
     }
     
     /**
-     * Load mood entries from SharedPreferences
+     * Load mood entries from Room Database
      */
     private fun loadMoodEntries() {
-        moodEntries.clear()
-        moodEntries.addAll(prefsManager.getMoodEntries())
-        // Sort by timestamp descending (newest first)
-        moodEntries.sortByDescending { it.timestamp }
-        moodAdapter.updateMoodEntries(moodEntries)
-        updateEmptyState()
-        updateChart()
+        lifecycleScope.launch {
+            moodEntries.clear()
+            moodEntries.addAll(prefsManager.moodEntryRepository.getAllMoodEntries())
+            // Already sorted by timestamp descending in query
+            moodAdapter.updateMoodEntries(moodEntries)
+            updateEmptyState()
+            updateChart()
+        }
     }
     
     /**
@@ -180,12 +183,11 @@ class MoodJournalFragment : Fragment() {
                     timeString = timeFormat.format(date)
                 )
                 
-                moodEntries.add(0, entry)  // Add to beginning
-                saveMoodEntries()
-                moodAdapter.updateMoodEntries(moodEntries)
-                updateEmptyState()
-                updateChart()
-                Toast.makeText(requireContext(), "Mood logged!", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    prefsManager.moodEntryRepository.insert(entry)
+                    loadMoodEntries()
+                    Toast.makeText(requireContext(), "Mood logged!", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -323,12 +325,5 @@ class MoodJournalFragment : Fragment() {
         }
         
         startActivity(Intent.createChooser(shareIntent, "Share mood summary via"))
-    }
-    
-    /**
-     * Save mood entries to SharedPreferences
-     */
-    private fun saveMoodEntries() {
-        prefsManager.saveMoodEntries(moodEntries)
     }
 }

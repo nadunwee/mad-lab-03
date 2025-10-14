@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.labexam03.R
@@ -16,6 +17,7 @@ import com.example.labexam03.adapters.HabitAdapter
 import com.example.labexam03.models.Habit
 import com.example.labexam03.utils.PreferencesManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,7 +57,7 @@ class HabitTrackerFragment : Fragment() {
         // Set up RecyclerView
         setupRecyclerView()
         
-        // Load habits from SharedPreferences
+        // Load habits from Room Database
         loadHabits()
         
         // Set up add button click listener
@@ -85,13 +87,15 @@ class HabitTrackerFragment : Fragment() {
     }
     
     /**
-     * Load habits from SharedPreferences
+     * Load habits from Room Database
      */
     private fun loadHabits() {
-        habits.clear()
-        habits.addAll(prefsManager.getHabits())
-        habitAdapter.updateHabits(habits)
-        updateEmptyState()
+        lifecycleScope.launch {
+            habits.clear()
+            habits.addAll(prefsManager.habitRepository.getAllHabits())
+            habitAdapter.updateHabits(habits)
+            updateEmptyState()
+        }
     }
     
     /**
@@ -141,11 +145,11 @@ class HabitTrackerFragment : Fragment() {
                     lastUpdated = getCurrentDate()
                 )
                 
-                habits.add(habit)
-                saveHabits()
-                habitAdapter.updateHabits(habits)
-                updateEmptyState()
-                Toast.makeText(requireContext(), "Habit added!", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    prefsManager.habitRepository.insert(habit)
+                    loadHabits()
+                    Toast.makeText(requireContext(), "Habit added!", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -184,11 +188,10 @@ class HabitTrackerFragment : Fragment() {
                 }
                 
                 // Update habit
-                val index = habits.indexOfFirst { it.id == habit.id }
-                if (index != -1) {
-                    habits[index] = habit.copy(name = name, targetCount = target)
-                    saveHabits()
-                    habitAdapter.updateHabits(habits)
+                lifecycleScope.launch {
+                    val updatedHabit = habit.copy(name = name, targetCount = target)
+                    prefsManager.habitRepository.update(updatedHabit)
+                    loadHabits()
                     Toast.makeText(requireContext(), "Habit updated!", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -204,11 +207,11 @@ class HabitTrackerFragment : Fragment() {
             .setTitle("Delete Habit")
             .setMessage("Are you sure you want to delete \"${habit.name}\"?")
             .setPositiveButton("Delete") { _, _ ->
-                habits.removeIf { it.id == habit.id }
-                saveHabits()
-                habitAdapter.updateHabits(habits)
-                updateEmptyState()
-                Toast.makeText(requireContext(), "Habit deleted", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    prefsManager.habitRepository.delete(habit)
+                    loadHabits()
+                    Toast.makeText(requireContext(), "Habit deleted", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -230,11 +233,13 @@ class HabitTrackerFragment : Fragment() {
             habit.currentCount++
         }
         
-        saveHabits()
-        habitAdapter.notifyDataSetChanged()
-        
-        if (habit.isCompleted()) {
-            Toast.makeText(requireContext(), "Habit completed! 🎉", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            prefsManager.habitRepository.update(habit)
+            loadHabits()
+            
+            if (habit.isCompleted()) {
+                Toast.makeText(requireContext(), "Habit completed! 🎉", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     
@@ -243,27 +248,23 @@ class HabitTrackerFragment : Fragment() {
      */
     private fun checkAndResetDailyProgress() {
         val currentDate = getCurrentDate()
-        var updated = false
         
-        habits.forEach { habit ->
-            if (habit.lastUpdated != currentDate) {
-                habit.currentCount = 0
-                habit.lastUpdated = currentDate
-                updated = true
+        lifecycleScope.launch {
+            var updated = false
+            
+            habits.forEach { habit ->
+                if (habit.lastUpdated != currentDate) {
+                    habit.currentCount = 0
+                    habit.lastUpdated = currentDate
+                    prefsManager.habitRepository.update(habit)
+                    updated = true
+                }
+            }
+            
+            if (updated) {
+                loadHabits()
             }
         }
-        
-        if (updated) {
-            saveHabits()
-            habitAdapter.notifyDataSetChanged()
-        }
-    }
-    
-    /**
-     * Save habits to SharedPreferences
-     */
-    private fun saveHabits() {
-        prefsManager.saveHabits(habits)
     }
     
     /**
