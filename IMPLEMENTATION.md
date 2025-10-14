@@ -3,9 +3,15 @@
 ## Architecture Overview
 
 ### Data Layer
-The app uses SharedPreferences for persistent storage, managed through the `PreferencesManager` utility class. This provides a centralized approach to data storage and retrieval.
+The app uses **Room Database** (SQLite ORM) for persistent storage of habits and mood entries, managed through repository classes that provide a clean API for data access. SharedPreferences is used for app settings like reminder configurations.
 
-**Key Design Decision**: SharedPreferences was chosen over SQLite/Room database as per requirements. While this limits complex querying capabilities, it's suitable for the app's data volume and simplifies implementation.
+**Key Design Decision**: Room Database was chosen for its type-safety, automatic object mapping, and support for complex queries. This provides a robust, scalable foundation compared to SharedPreferences, while still maintaining SharedPreferences for simple settings.
+
+### Repository Pattern
+The app implements the repository pattern to separate data access logic from business logic:
+- **HabitRepository**: Manages habit data access through HabitDao
+- **MoodEntryRepository**: Manages mood entry data access through MoodEntryDao
+- **PreferencesManager**: Provides unified access to repositories and settings
 
 ### Presentation Layer
 The app follows a Fragment-based architecture with three main screens:
@@ -130,17 +136,58 @@ Five mood options: 😢 (Very Sad), 😞 (Sad), 😐 (Neutral), 😊 (Happy), �
 - `reminder_interval`: Integer (minutes)
 - `last_reminder_time`: Long (timestamp)
 
-### Serialization
-Gson library handles JSON serialization/deserialization:
-```kotlin
-// Save
-val json = gson.toJson(habits)
-prefs.edit().putString("habits", json).apply()
+### Room Database (SQLite)
+The app uses Room ORM for structured data persistence:
 
-// Load
-val json = prefs.getString("habits", null)
-val type = object : TypeToken<MutableList<Habit>>() {}.type
-val habits = gson.fromJson<MutableList<Habit>>(json, type)
+**Entities**:
+- `Habit`: Daily habits stored in `habits` table
+- `MoodEntry`: Mood journal entries stored in `mood_entries` table
+
+**DAOs (Data Access Objects)**:
+```kotlin
+@Dao
+interface HabitDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(habit: Habit)
+    
+    @Update
+    suspend fun update(habit: Habit)
+    
+    @Query("SELECT * FROM habits ORDER BY name ASC")
+    suspend fun getAllHabits(): List<Habit>
+    
+    @Query("SELECT * FROM habits ORDER BY name ASC")
+    fun getAllHabitsFlow(): Flow<List<Habit>>
+}
+```
+
+**Repository Pattern**:
+```kotlin
+class HabitRepository(private val habitDao: HabitDao) {
+    val allHabits: Flow<List<Habit>> = habitDao.getAllHabitsFlow()
+    
+    suspend fun insert(habit: Habit) = habitDao.insert(habit)
+    suspend fun update(habit: Habit) = habitDao.update(habit)
+}
+```
+
+**Usage with Coroutines**:
+```kotlin
+// In Fragment
+lifecycleScope.launch {
+    val habits = prefsManager.habitRepository.getAllHabits()
+    habitAdapter.updateHabits(habits)
+}
+```
+
+**Migration**: Automatic migration from old SharedPreferences data on first launch.
+
+### Serialization (Legacy)
+Gson library is kept for backward compatibility with settings:
+```kotlin
+// Only used for settings now
+val json = gson.toJson(settingsData)
+prefs.edit().putString("settings", json).apply()
 ```
 
 ## UI/UX Design
@@ -242,16 +289,19 @@ startActivity(Intent.createChooser(shareIntent, "Share via"))
 
 ### Efficient Data Loading
 - Lazy loading of data only when needed
-- Direct deserialization from JSON
+- Async database queries with Coroutines
+- Flow for reactive data updates
 - No unnecessary database queries
 
 ### Memory Management
 - RecyclerView for efficient list rendering
 - ViewHolder pattern for view recycling
 - Minimal object creation in loops
+- Room database connection pooling
 
 ### UI Responsiveness
-- Data operations on main thread (acceptable for SharedPreferences)
+- All database operations on background threads via Coroutines
+- lifecycleScope for lifecycle-aware async operations
 - Immediate UI updates after actions
 - Smooth animations and transitions
 
@@ -271,7 +321,7 @@ startActivity(Intent.createChooser(shareIntent, "Share via"))
 ## Future Enhancements
 
 Potential improvements (beyond scope):
-1. **Database Migration**: Move to Room for complex queries
+1. ~~**Database Migration**: Move to Room for complex queries~~ ✅ **COMPLETED**
 2. **Cloud Sync**: Firebase integration for multi-device support
 3. **Advanced Charts**: More visualization options
 4. **Habit Streaks**: Track consecutive completion days
@@ -279,25 +329,28 @@ Potential improvements (beyond scope):
 6. **Export Data**: CSV/PDF export functionality
 7. **Themes**: Dark mode and custom themes
 8. **Widgets**: Home screen widget for quick access
-9. **Backup/Restore**: Data backup functionality
+9. **Backup/Restore**: Export Room database to file
 10. **Social Features**: Share achievements with friends
+11. **Full-Text Search**: Search notes and habit names using Room FTS
+12. **Complex Queries**: Advanced filtering and sorting with SQL
 
 ## Known Limitations
 
-1. **No Data Backup**: Data lost if app uninstalled
-2. **Single Device**: No multi-device synchronization
-3. **Limited Queries**: SharedPreferences doesn't support complex queries
-4. **No Offline Charts**: Charts require data in memory
-5. **Fixed Interval**: Reminders at fixed intervals only
+1. **No Cloud Backup**: Data stored locally only (can be exported manually)
+2. **Single Device**: No multi-device synchronization (requires cloud integration)
+3. **Fixed Interval**: Reminders at fixed intervals only
+4. **Manual Backup**: Database backup requires manual export
 
 ## Conclusion
 
 This Personal Wellness App demonstrates:
 - Complete Android app development lifecycle
-- Modern Kotlin best practices
+- Modern Kotlin best practices with Coroutines
 - Material Design principles
 - Effective use of Android SDK components
-- Clean, maintainable code architecture
+- **Room Database (SQLite) with ORM**
+- Clean, maintainable code architecture with Repository pattern
+- Type-safe database operations
 - Comprehensive documentation
 
 The app successfully meets all requirements while providing an intuitive, feature-rich user experience for promoting personal wellness.

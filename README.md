@@ -9,7 +9,7 @@ A complete Android application built with Kotlin that promotes personal wellness
 - **Progress Tracking**: Visual progress bars showing completion percentage
 - **Daily Targets**: Set custom targets for each habit
 - **Auto-Reset**: Progress automatically resets at the start of each day
-- **Persistent Storage**: All habits saved using SharedPreferences
+- **Persistent Storage**: All habits saved using Room Database (SQLite)
 
 ### 2. Mood Journal with Emoji Selector
 - **Emoji-Based Mood Logging**: Select from 5 different mood emojis (😢, 😞, 😐, 😊, 😄)
@@ -37,24 +37,36 @@ A complete Android application built with Kotlin that promotes personal wellness
 - **MVVM Pattern**: Separation of concerns with Models, Views, and data management
 - **Fragments**: Modular UI with HabitTrackerFragment, MoodJournalFragment, and SettingsFragment
 - **Navigation**: BottomNavigationView for seamless fragment switching
-- **Data Persistence**: SharedPreferences for all data storage (no databases)
+- **Data Persistence**: Room Database with SQLite for habits and mood entries, SharedPreferences for settings
+- **Repository Pattern**: Clean separation between data access and business logic
 
 ### Key Technologies
 - **Language**: Kotlin
 - **Minimum SDK**: API 24 (Android 7.0)
 - **Target SDK**: API 36
 - **UI Framework**: Material Design 3
+- **Database**: Room ORM with SQLite
+- **Async Operations**: Kotlin Coroutines
 - **Charts**: MPAndroidChart library
 - **JSON Parsing**: Gson for data serialization
 
 ### Components
 
 #### Data Models
-- `Habit.kt`: Represents a daily habit with progress tracking
-- `MoodEntry.kt`: Represents a mood journal entry with emoji and notes
+- `Habit.kt`: Room Entity representing a daily habit with progress tracking
+- `MoodEntry.kt`: Room Entity representing a mood journal entry with emoji and notes
+
+#### Database Layer
+- `AppDatabase.kt`: Room database instance managing SQLite database
+- `HabitDao.kt`: Data Access Object for habit operations
+- `MoodEntryDao.kt`: Data Access Object for mood entry operations
+
+#### Repository Layer
+- `HabitRepository.kt`: Repository for habit data access
+- `MoodEntryRepository.kt`: Repository for mood entry data access
 
 #### Utilities
-- `PreferencesManager.kt`: Centralized SharedPreferences management for all app data
+- `PreferencesManager.kt`: Manages Room database repositories and SharedPreferences for settings
 
 #### Adapters
 - `HabitAdapter.kt`: RecyclerView adapter for displaying habits
@@ -86,11 +98,20 @@ Three main screens accessible via bottom navigation:
 
 ## Data Persistence
 
-All data is stored using SharedPreferences:
-- **Habits List**: JSON-serialized list of habits
-- **Mood Entries**: JSON-serialized list of mood entries
-- **Reminder Settings**: Boolean for enabled state, integer for interval
-- **Last Update Times**: Timestamps for data synchronization
+The app uses a hybrid persistence strategy:
+
+### Room Database (SQLite)
+- **Habits**: Stored in `habits` table with full CRUD operations
+- **Mood Entries**: Stored in `mood_entries` table ordered by timestamp
+- **Benefits**: Type-safe queries, automatic migration, reactive updates via Flow
+- **Migration**: Automatic migration from old SharedPreferences data on first launch
+
+### SharedPreferences
+- **Reminder Settings**: Enabled state and interval configuration
+- **App Settings**: Last reminder time and other preferences
+- **Lightweight**: Used only for simple key-value settings
+
+For detailed information about the Room database implementation, see [ROOM_INTEGRATION.md](ROOM_INTEGRATION.md)
 
 ## Code Quality
 
