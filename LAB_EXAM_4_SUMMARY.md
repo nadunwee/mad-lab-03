@@ -12,7 +12,7 @@ This document summarizes the integration of SQLite database with Room ORM into t
 - **Tables**: 
   - `habits` - Stores daily habit tracking data
   - `mood_entries` - Stores mood journal entries
-- **Location**: `/data/data/com.example.labexam03/databases/wellness_database`
+- **Location**: Device internal storage (app-specific database directory)
 
 ### 2. ✅ Room ORM (Object-Relational Mapping)
 - **Room Version**: 2.6.1

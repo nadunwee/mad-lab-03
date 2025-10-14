@@ -69,7 +69,7 @@ interface HabitDao {
 }
 
 // AppDatabase.kt - Database
-@Database(entities = [Habit::class, MoodEntry::class], version = 1)
+@Database(entities = [Habit::class, MoodEntry::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun habitDao(): HabitDao
     abstract fun moodEntryDao(): MoodEntryDao
